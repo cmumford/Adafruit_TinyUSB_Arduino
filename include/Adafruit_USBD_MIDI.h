@@ -28,7 +28,7 @@
 #include <Adafruit_USBD_Device.h>
 
 class Adafruit_USBD_MIDI : public Adafruit_USBD_Interface {
-public:
+ public:
   Adafruit_USBD_MIDI(void);
 
   bool begin(void);
@@ -51,12 +51,13 @@ public:
   bool receive(uint8_t packet[4]);
 
   // from Adafruit_USBD_Interface
-  virtual uint16_t getDescriptor(uint8_t itfnum, uint8_t *buf,
+  virtual uint16_t getDescriptor(uint8_t itfnum,
+                                 uint8_t* buf,
                                  uint16_t bufsize);
 
   void setCables(uint8_t n_cables);
 
-private:
+ private:
   uint8_t _n_cables;
 };
 

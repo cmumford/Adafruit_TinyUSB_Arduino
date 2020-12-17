@@ -35,7 +35,7 @@
 
 enum { VENDOR_REQUEST_WEBUSB = 1, VENDOR_REQUEST_MICROSOFT = 2 };
 
-static Adafruit_USBD_WebUSB *_webusb_dev = NULL;
+static Adafruit_USBD_WebUSB* _webusb_dev = NULL;
 
 //--------------------------------------------------------------------+
 // BOS Descriptor
@@ -56,7 +56,7 @@ https://developers.google.com/web/fundamentals/native-hardware/build-for-webusb/
 (Section Microsoft OS compatibility descriptors)
 */
 
-#define BOS_TOTAL_LEN                                                          \
+#define BOS_TOTAL_LEN \
   (TUD_BOS_DESC_LEN + TUD_BOS_WEBUSB_DESC_LEN + TUD_BOS_MICROSOFT_OS_DESC_LEN)
 
 #define MS_OS_20_DESC_LEN 0xB2
@@ -72,7 +72,9 @@ uint8_t const desc_bos[] = {
     // Microsoft OS 2.0 descriptor
     TUD_BOS_MS_OS_20_DESCRIPTOR(MS_OS_20_DESC_LEN, VENDOR_REQUEST_MICROSOFT)};
 
-uint8_t const *tud_descriptor_bos_cb(void) { return desc_bos; }
+uint8_t const* tud_descriptor_bos_cb(void) {
+  return desc_bos;
+}
 
 uint8_t desc_ms_os_20[] = {
     // Set header: length, type, windows version, total length
@@ -93,18 +95,18 @@ uint8_t desc_ms_os_20[] = {
     // compatible ID
     U16_TO_U8S_LE(0x0014), U16_TO_U8S_LE(MS_OS_20_FEATURE_COMPATBLE_ID), 'W',
     'I', 'N', 'U', 'S', 'B', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, // sub-compatible
+    0x00, 0x00,  // sub-compatible
 
     // MS OS 2.0 Registry property descriptor: length, type
     U16_TO_U8S_LE(MS_OS_20_DESC_LEN - 0x0A - 0x08 - 0x08 - 0x14),
     U16_TO_U8S_LE(MS_OS_20_FEATURE_REG_PROPERTY), U16_TO_U8S_LE(0x0007),
-    U16_TO_U8S_LE(0x002A), // wPropertyDataType, wPropertyNameLength and
-                           // PropertyName "DeviceInterfaceGUIDs\0" in UTF-16
+    U16_TO_U8S_LE(0x002A),  // wPropertyDataType, wPropertyNameLength and
+                            // PropertyName "DeviceInterfaceGUIDs\0" in UTF-16
     'D', 0x00, 'e', 0x00, 'v', 0x00, 'i', 0x00, 'c', 0x00, 'e', 0x00, 'I', 0x00,
     'n', 0x00, 't', 0x00, 'e', 0x00, 'r', 0x00, 'f', 0x00, 'a', 0x00, 'c', 0x00,
     'e', 0x00, 'G', 0x00, 'U', 0x00, 'I', 0x00, 'D', 0x00, 's', 0x00, 0x00,
     0x00,
-    U16_TO_U8S_LE(0x0050), // wPropertyDataLength
+    U16_TO_U8S_LE(0x0050),  // wPropertyDataLength
     // bPropertyData: “{975F44D9-0D08-43FD-8B3E-127CA8AFFF9D}”.
     '{', 0x00, '9', 0x00, '7', 0x00, '5', 0x00, 'F', 0x00, '4', 0x00, '4', 0x00,
     'D', 0x00, '9', 0x00, '-', 0x00, '0', 0x00, 'D', 0x00, '0', 0x00, '8', 0x00,
@@ -134,8 +136,8 @@ bool Adafruit_USBD_WebUSB::begin(void) {
   return true;
 }
 
-bool Adafruit_USBD_WebUSB::setLandingPage(const void *url) {
-  _url = (const uint8_t *)url;
+bool Adafruit_USBD_WebUSB::setLandingPage(const void* url) {
+  _url = (const uint8_t*)url;
   return true;
 }
 
@@ -143,7 +145,8 @@ void Adafruit_USBD_WebUSB::setLineStateCallback(linestate_callback_t fp) {
   _linestate_cb = fp;
 }
 
-uint16_t Adafruit_USBD_WebUSB::getDescriptor(uint8_t itfnum, uint8_t *buf,
+uint16_t Adafruit_USBD_WebUSB::getDescriptor(uint8_t itfnum,
+                                             uint8_t* buf,
                                              uint16_t bufsize) {
   // usb core will automatically update endpoint number
   uint8_t desc[] = {TUD_VENDOR_DESCRIPTOR(itfnum, 0, EPOUT, EPIN, 64)};
@@ -189,9 +192,11 @@ int Adafruit_USBD_WebUSB::read(void) {
   return tud_vendor_read(&ch, 1) ? (int)ch : -1;
 }
 
-size_t Adafruit_USBD_WebUSB::write(uint8_t b) { return this->write(&b, 1); }
+size_t Adafruit_USBD_WebUSB::write(uint8_t b) {
+  return this->write(&b, 1);
+}
 
-size_t Adafruit_USBD_WebUSB::write(const uint8_t *buffer, size_t size) {
+size_t Adafruit_USBD_WebUSB::write(const uint8_t* buffer, size_t size) {
   size_t remain = size;
   while (remain && _connected) {
     size_t wrcount = tud_vendor_write(buffer, remain);
@@ -217,49 +222,49 @@ extern "C" {
 
 // Invoked when received VENDOR control request
 bool tud_vendor_control_request_cb(uint8_t rhport,
-                                   tusb_control_request_t const *request) {
+                                   tusb_control_request_t const* request) {
   if (!_webusb_dev)
     return false;
 
   switch (request->bRequest) {
-  case VENDOR_REQUEST_WEBUSB:
-    // match vendor request in BOS descriptor
-    // Get landing page url
-    if (!_webusb_dev->_url)
+    case VENDOR_REQUEST_WEBUSB:
+      // match vendor request in BOS descriptor
+      // Get landing page url
+      if (!_webusb_dev->_url)
+        return false;
+      return tud_control_xfer(rhport, request, (void*)_webusb_dev->_url,
+                              _webusb_dev->_url[0]);
+
+    case VENDOR_REQUEST_MICROSOFT:
+      if (request->wIndex == 7) {
+        // Get Microsoft OS 2.0 compatible descriptor
+        uint16_t total_len;
+        memcpy(&total_len, desc_ms_os_20 + 8, 2);
+
+        return tud_control_xfer(rhport, request, (void*)desc_ms_os_20,
+                                total_len);
+      } else {
+        return false;
+      }
+
+    case 0x22:
+      // Webserial simulate the CDC_REQUEST_SET_CONTROL_LINE_STATE (0x22) to
+      // connect and disconnect.
+      _webusb_dev->_connected = (request->wValue != 0);
+
+      // response with status OK
+      tud_control_status(rhport, request);
+
+      // invoked callback if any
+      if (_webusb_dev->_linestate_cb)
+        _webusb_dev->_linestate_cb(_webusb_dev->_connected);
+
+      return true;
+      ;
+
+    default:
+      // stall unknown request
       return false;
-    return tud_control_xfer(rhport, request, (void *)_webusb_dev->_url,
-                            _webusb_dev->_url[0]);
-
-  case VENDOR_REQUEST_MICROSOFT:
-    if (request->wIndex == 7) {
-      // Get Microsoft OS 2.0 compatible descriptor
-      uint16_t total_len;
-      memcpy(&total_len, desc_ms_os_20 + 8, 2);
-
-      return tud_control_xfer(rhport, request, (void *)desc_ms_os_20,
-                              total_len);
-    } else {
-      return false;
-    }
-
-  case 0x22:
-    // Webserial simulate the CDC_REQUEST_SET_CONTROL_LINE_STATE (0x22) to
-    // connect and disconnect.
-    _webusb_dev->_connected = (request->wValue != 0);
-
-    // response with status OK
-    tud_control_status(rhport, request);
-
-    // invoked callback if any
-    if (_webusb_dev->_linestate_cb)
-      _webusb_dev->_linestate_cb(_webusb_dev->_connected);
-
-    return true;
-    ;
-
-  default:
-    // stall unknown request
-    return false;
   }
 
   return true;
@@ -267,7 +272,7 @@ bool tud_vendor_control_request_cb(uint8_t rhport,
 
 // Invoked when DATA Stage of VENDOR's request is complete
 bool tud_vendor_control_complete_cb(uint8_t rhport,
-                                    tusb_control_request_t const *request) {
+                                    tusb_control_request_t const* request) {
   (void)rhport;
   (void)request;
 

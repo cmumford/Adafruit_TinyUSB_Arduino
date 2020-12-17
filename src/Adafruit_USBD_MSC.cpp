@@ -29,16 +29,17 @@
 
 #define EPOUT 0x00
 #define EPIN 0x80
-#define EPSIZE 64 // TODO must be 512 for highspeed device
+#define EPSIZE 64  // TODO must be 512 for highspeed device
 
-static Adafruit_USBD_MSC *_msc_dev = NULL;
+static Adafruit_USBD_MSC* _msc_dev = NULL;
 
 Adafruit_USBD_MSC::Adafruit_USBD_MSC(void) {
   _maxlun = 1;
   memset(_lun, 0, sizeof(_lun));
 }
 
-uint16_t Adafruit_USBD_MSC::getDescriptor(uint8_t itfnum, uint8_t *buf,
+uint16_t Adafruit_USBD_MSC::getDescriptor(uint8_t itfnum,
+                                          uint8_t* buf,
                                           uint16_t bufsize) {
   // usb core will automatically update endpoint number
   uint8_t desc[] = {TUD_MSC_DESCRIPTOR(itfnum, 0, EPOUT, EPIN, EPSIZE)};
@@ -50,18 +51,25 @@ uint16_t Adafruit_USBD_MSC::getDescriptor(uint8_t itfnum, uint8_t *buf,
   return len;
 }
 
-void Adafruit_USBD_MSC::setMaxLun(uint8_t maxlun) { _maxlun = maxlun; }
+void Adafruit_USBD_MSC::setMaxLun(uint8_t maxlun) {
+  _maxlun = maxlun;
+}
 
-uint8_t Adafruit_USBD_MSC::getMaxLun(void) { return _maxlun; }
+uint8_t Adafruit_USBD_MSC::getMaxLun(void) {
+  return _maxlun;
+}
 
-void Adafruit_USBD_MSC::setID(uint8_t lun, const char *vendor_id,
-                              const char *product_id, const char *product_rev) {
+void Adafruit_USBD_MSC::setID(uint8_t lun,
+                              const char* vendor_id,
+                              const char* product_id,
+                              const char* product_rev) {
   _lun[lun]._inquiry_vid = vendor_id;
   _lun[lun]._inquiry_pid = product_id;
   _lun[lun]._inquiry_rev = product_rev;
 }
 
-void Adafruit_USBD_MSC::setCapacity(uint8_t lun, uint32_t block_count,
+void Adafruit_USBD_MSC::setCapacity(uint8_t lun,
+                                    uint32_t block_count,
                                     uint16_t block_size) {
   _lun[lun].block_count = block_count;
   _lun[lun].block_size = block_size;
@@ -71,7 +79,8 @@ void Adafruit_USBD_MSC::setUnitReady(uint8_t lun, bool ready) {
   _lun[lun].unit_ready = ready;
 }
 
-void Adafruit_USBD_MSC::setReadWriteCallback(uint8_t lun, read_callback_t rd_cb,
+void Adafruit_USBD_MSC::setReadWriteCallback(uint8_t lun,
+                                             read_callback_t rd_cb,
                                              write_callback_t wr_cb,
                                              flush_callback_t fl_cb) {
   _lun[lun].rd_cb = rd_cb;
@@ -104,19 +113,21 @@ uint8_t tud_msc_get_maxlun_cb(void) {
 // Invoked when received SCSI_CMD_INQUIRY
 // Application fill vendor id, product id and revision with string up to 8, 16,
 // 4 characters respectively
-void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8],
-                        uint8_t product_id[16], uint8_t product_rev[4]) {
+void tud_msc_inquiry_cb(uint8_t lun,
+                        uint8_t vendor_id[8],
+                        uint8_t product_id[16],
+                        uint8_t product_rev[4]) {
   if (!_msc_dev)
     return;
 
   // If not set use default ID "Adafruit - Mass Storage - 1.0"
-  const char *vid =
+  const char* vid =
       (_msc_dev->_lun[lun]._inquiry_vid ? _msc_dev->_lun[lun]._inquiry_vid
                                         : "Adafruit");
-  const char *pid =
+  const char* pid =
       (_msc_dev->_lun[lun]._inquiry_pid ? _msc_dev->_lun[lun]._inquiry_pid
                                         : "Mass Storage");
-  const char *rev =
+  const char* rev =
       (_msc_dev->_lun[lun]._inquiry_rev ? _msc_dev->_lun[lun]._inquiry_rev
                                         : "1.0");
 
@@ -139,8 +150,9 @@ bool tud_msc_test_unit_ready_cb(uint8_t lun) {
 }
 
 // Callback invoked to determine disk's size
-void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count,
-                         uint16_t *block_size) {
+void tud_msc_capacity_cb(uint8_t lun,
+                         uint32_t* block_count,
+                         uint16_t* block_size) {
   if (!_msc_dev)
     return;
 
@@ -151,25 +163,27 @@ void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count,
 // Callback invoked when received an SCSI command not in built-in list below
 // - READ_CAPACITY10, READ_FORMAT_CAPACITY, INQUIRY, MODE_SENSE6, REQUEST_SENSE
 // - READ10 and WRITE10 has their own callbacks
-int32_t tud_msc_scsi_cb(uint8_t lun, const uint8_t scsi_cmd[16], void *buffer,
+int32_t tud_msc_scsi_cb(uint8_t lun,
+                        const uint8_t scsi_cmd[16],
+                        void* buffer,
                         uint16_t bufsize) {
-  const void *response = NULL;
+  const void* response = NULL;
   uint16_t resplen = 0;
 
   switch (scsi_cmd[0]) {
-  case SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL:
-    // Host is about to read/write etc ... better not to disconnect disk
-    resplen = 0;
-    break;
+    case SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL:
+      // Host is about to read/write etc ... better not to disconnect disk
+      resplen = 0;
+      break;
 
-  default:
-    // Set Sense = Invalid Command Operation
-    tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x20, 0x00);
+    default:
+      // Set Sense = Invalid Command Operation
+      tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x20, 0x00);
 
-    // negative means error -> tinyusb could stall and/or response with failed
-    // status
-    resplen = -1;
-    break;
+      // negative means error -> tinyusb could stall and/or response with failed
+      // status
+      resplen = -1;
+      break;
   }
 
   // return len must not larger than bufsize
@@ -186,8 +200,11 @@ int32_t tud_msc_scsi_cb(uint8_t lun, const uint8_t scsi_cmd[16], void *buffer,
 
 // Callback invoked when received READ10 command.
 // Copy disk's data to buffer (up to bufsize) and return number of copied bytes.
-int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset,
-                          void *buffer, uint32_t bufsize) {
+int32_t tud_msc_read10_cb(uint8_t lun,
+                          uint32_t lba,
+                          uint32_t offset,
+                          void* buffer,
+                          uint32_t bufsize) {
   (void)offset;
 
   if (!(_msc_dev && _msc_dev->_lun[lun].rd_cb))
@@ -198,8 +215,11 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset,
 
 // Callback invoked when received WRITE10 command.
 // Process data in buffer to disk's storage and return number of written bytes
-int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset,
-                           uint8_t *buffer, uint32_t bufsize) {
+int32_t tud_msc_write10_cb(uint8_t lun,
+                           uint32_t lba,
+                           uint32_t offset,
+                           uint8_t* buffer,
+                           uint32_t bufsize) {
   (void)offset;
 
   if (!(_msc_dev && _msc_dev->_lun[lun].wr_cb))
@@ -218,4 +238,4 @@ void tud_msc_write10_complete_cb(uint8_t lun) {
   return _msc_dev->_lun[lun].fl_cb();
 }
 
-} // extern "C"
+}  // extern "C"
