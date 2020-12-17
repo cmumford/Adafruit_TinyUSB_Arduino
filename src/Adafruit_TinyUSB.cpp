@@ -23,7 +23,6 @@
  */
 
 #include "Adafruit_TinyUSB.h"
-#include "Arduino.h"
 
 //--------------------------------------------------------------------+
 // MACRO TYPEDEF CONSTANT ENUM DECLARATION

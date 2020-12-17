@@ -25,9 +25,9 @@
 #ifndef ADAFRUIT_USBD_MIDI_H_
 #define ADAFRUIT_USBD_MIDI_H_
 
-#include "Adafruit_TinyUSB_Core.h"
+#include <Adafruit_USBD_Device.h>
 
-class Adafruit_USBD_MIDI : public Stream, public Adafruit_USBD_Interface {
+class Adafruit_USBD_MIDI : public Adafruit_USBD_Interface {
 public:
   Adafruit_USBD_MIDI(void);
 
@@ -45,8 +45,6 @@ public:
   virtual int available(void);
   virtual int peek(void);
   virtual void flush(void);
-
-  using Stream::write;
 
   // Raw MIDI USB packet interface.
   bool send(const uint8_t packet[4]);

@@ -24,6 +24,9 @@
 
 #include "Adafruit_USBD_MSC.h"
 
+#include <class/msc/msc.h>
+#include <class/msc/msc_device.h>
+
 #define EPOUT 0x00
 #define EPIN 0x80
 #define EPSIZE 64 // TODO must be 512 for highspeed device

@@ -23,7 +23,6 @@
  */
 
 #include "Adafruit_USBD_WebUSB.h"
-#include "Arduino.h"
 
 #if CFG_TUD_VENDOR
 

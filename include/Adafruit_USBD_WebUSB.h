@@ -25,7 +25,9 @@
 #ifndef ADAFRUIT_USBD_WEBUSB_H_
 #define ADAFRUIT_USBD_WEBUSB_H_
 
-#include "Adafruit_TinyUSB_Core.h"
+#include <cstdint>
+
+#include <Adafruit_USBD_Device.h>
 
 #define WEBUSB_URL_DEF(_name, _scheme, _url)                                   \
   struct TU_ATTR_PACKED {                                                      \
@@ -35,7 +37,7 @@
     char url[3 + sizeof(_url)];                                                \
   } const _name = {3 + sizeof(_url) - 1, 3, _scheme, _url}
 
-class Adafruit_USBD_WebUSB : public Stream, public Adafruit_USBD_Interface {
+class Adafruit_USBD_WebUSB : public Adafruit_USBD_Interface {
 public:
   typedef void (*linestate_callback_t)(bool connected);
   Adafruit_USBD_WebUSB(void);
@@ -49,10 +51,10 @@ public:
   virtual int read(void);
   virtual int available(void);
   virtual int peek(void);
-  virtual void flush(void);
+  virtual void flush(void) ;
   virtual size_t write(uint8_t b);
 
-  virtual size_t write(const uint8_t *buffer, size_t size);
+  virtual size_t write(const uint8_t *buffer, size_t size) ;
   size_t write(const char *buffer, size_t size) {
     return write((const uint8_t *)buffer, size);
   }

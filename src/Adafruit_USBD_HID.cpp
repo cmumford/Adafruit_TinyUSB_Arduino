@@ -24,6 +24,8 @@
 
 #include "Adafruit_USBD_HID.h"
 
+#include <hid/hid_device.h>
+
 #define EPOUT 0x00
 #define EPIN 0x80
 
@@ -78,10 +80,10 @@ uint16_t Adafruit_USBD_HID::getDescriptor(uint8_t itfnum, uint8_t *buf,
   // usb core will automatically update endpoint number
   uint8_t const desc_inout[] = {
       TUD_HID_INOUT_DESCRIPTOR(itfnum, 0, _protocol, _desc_report_len, EPIN,
-                               EPOUT, CFG_TUD_HID_BUFSIZE, _interval_ms)};
+                               EPOUT, CFG_TUD_HID_EP_BUFSIZE, _interval_ms)};
   uint8_t const desc_in_only[] = {
       TUD_HID_DESCRIPTOR(itfnum, 0, _protocol, _desc_report_len, EPIN,
-                         CFG_TUD_HID_BUFSIZE, _interval_ms)};
+                         CFG_TUD_HID_EP_BUFSIZE, _interval_ms)};
 
   uint8_t const *desc;
   uint16_t len;
@@ -178,9 +180,10 @@ bool Adafruit_USBD_HID::keyboardPress(uint8_t report_id, char ch) {
   uint8_t keycode[6] = {0};
   uint8_t modifier = 0;
 
-  if (_ascii2keycode[ch][0])
+  const int idx = static_cast<int>(ch);
+  if (_ascii2keycode[idx][0])
     modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
-  keycode[0] = _ascii2keycode[ch][1];
+  keycode[0] = _ascii2keycode[idx][1];
 
   return tud_hid_keyboard_report(report_id, modifier, keycode);
 }

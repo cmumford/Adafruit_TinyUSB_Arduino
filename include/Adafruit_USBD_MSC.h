@@ -25,7 +25,11 @@
 #ifndef ADAFRUIT_USBD_MSC_H_
 #define ADAFRUIT_USBD_MSC_H_
 
-#include "Adafruit_TinyUSB_Core.h"
+#define CFG_TUD_MSC_EP_BUFSIZE 512
+
+#include <class/msc/msc_device.h>
+
+#include <Adafruit_USBD_Device.h>
 
 class Adafruit_USBD_MSC : public Adafruit_USBD_Interface {
 public:
